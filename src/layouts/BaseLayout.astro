@@ -1,0 +1,200 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+  activeNav?: string;
+}
+
+const { title, description = 'A free, passion-made Unity course for complete beginners.', activeNav = '' } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title}</title>
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <link rel="apple-touch-icon" href="/favicon.png" />
+  <meta name="description" content={description} />
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo"><span class="accent">✦</span> Make The Game</a>
+
+  <!-- Desktop links -->
+  <ul class="nav-links">
+    <li><a href="/assets" class={activeNav === 'assets' ? 'active' : ''}>Free Assets</a></li>
+    <li><a href="/#newsletter">Newsletter</a></li>
+    <li><a href="https://ko-fi.com" target="_blank" class="nav-cta">☕ Ko-fi</a></li>
+  </ul>
+
+  <!-- Mobile hamburger -->
+  <button class="nav-hamburger" id="nav-hamburger" aria-label="Open menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- Mobile drawer overlay -->
+<div class="nav-overlay" id="nav-overlay"></div>
+
+<!-- Mobile drawer -->
+<div class="nav-drawer" id="nav-drawer">
+  <div class="nav-drawer-header">
+    <span class="nav-drawer-logo"><span class="accent">✦</span> Make The Game</span>
+    <button class="nav-drawer-close" id="nav-drawer-close" aria-label="Close menu">✕</button>
+  </div>
+  <ul class="nav-drawer-links">
+    <li><a href="/assets">Free Assets</a></li>
+    <li><a href="/#newsletter">Newsletter</a></li>
+  </ul>
+  <a href="https://ko-fi.com" target="_blank" class="nav-drawer-kofi">☕ Support on Ko-fi</a>
+</div>
+
+<slot />
+
+<footer>
+  <div>
+    <div class="footer-logo"><span>✦</span> Make The Game</div>
+    <div class="footer-sub">A free Unity course for complete beginners · devxdprogamer</div>
+  </div>
+  <div class="footer-right">
+    <div class="footer-links">
+      <a href="/assets">Free Assets</a>
+      <a href="https://ko-fi.com" target="_blank">Ko-fi ☕</a>
+    </div>
+    <div>Made with care · Free forever</div>
+  </div>
+</footer>
+
+<style is:global>
+  /* -- HAMBURGER BUTTON -- */
+  .nav-hamburger {
+    display: none;
+    flex-direction: column; justify-content: center; gap: 5px;
+    width: 38px; height: 38px; padding: 6px;
+    background: none; border: none; cursor: pointer;
+    flex-shrink: 0;
+  }
+  .nav-hamburger span {
+    display: block; width: 100%; height: 2px;
+    background: var(--ink); border-radius: 2px;
+    transition: all .25s;
+  }
+
+  /* -- MOBILE DRAWER -- */
+  .nav-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(42,33,24,.45); z-index: 200;
+    backdrop-filter: blur(2px);
+  }
+  .nav-overlay.open { display: block; }
+
+  .nav-drawer {
+    position: fixed; top: 0; right: 0;
+    width: min(300px, 85vw); height: 100dvh;
+    background: var(--paper);
+    border-left: 1.5px solid var(--border);
+    z-index: 201; padding: 0;
+    transform: translateX(100%);
+    transition: transform .3s cubic-bezier(.4,0,.2,1);
+    display: flex; flex-direction: column;
+  }
+  .nav-drawer.open { transform: translateX(0); }
+
+  .nav-drawer-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.1rem 1.25rem;
+    border-bottom: 1.5px solid var(--border);
+  }
+  .nav-drawer-logo {
+    font-family: "Lora", serif; font-weight: 600; font-size: .95rem;
+    color: var(--ink); display: flex; align-items: center; gap: .4rem;
+  }
+  .nav-drawer-close {
+    background: none; border: none; cursor: pointer;
+    font-size: 1rem; color: var(--ink-soft); padding: .3rem .5rem;
+    border-radius: 5px; transition: color .2s;
+  }
+  .nav-drawer-close:hover { color: var(--rust); }
+
+  .nav-drawer-links {
+    list-style: none; padding: 1rem 0; flex: 1;
+  }
+  .nav-drawer-links li a {
+    display: block; padding: .8rem 1.5rem;
+    font-size: .95rem; font-weight: 500; color: var(--ink-soft);
+    text-decoration: none; transition: all .15s;
+    border-left: 3px solid transparent;
+  }
+  .nav-drawer-links li a:hover {
+    color: var(--rust); background: rgba(196,82,42,.04);
+    border-left-color: var(--rust);
+  }
+
+  .nav-drawer-kofi {
+    margin: 1rem 1.25rem 2rem;
+    display: block; text-align: center;
+    background: var(--rust); color: #fff;
+    padding: .75rem; border-radius: 8px;
+    font-size: .9rem; font-weight: 500;
+    text-decoration: none; transition: background .2s;
+  }
+  .nav-drawer-kofi:hover { background: #a8401e; }
+
+  /* -- THEME TOGGLE -- */
+  .theme-toggle {
+    display: flex; align-items: center; justify-content: center;
+    width: 34px; height: 34px;
+    background: none; border: 1.5px solid var(--border);
+    border-radius: 8px; cursor: pointer; color: var(--ink-soft);
+    flex-shrink: 0; transition: border-color .2s, color .2s, background .2s;
+  }
+  .theme-toggle:hover { border-color: var(--rust); color: var(--rust); }
+  .theme-toggle .icon-moon { display: none; }
+  .theme-toggle .icon-sun  { display: block; }
+  [data-theme="dark"] .theme-toggle .icon-moon { display: block; }
+  [data-theme="dark"] .theme-toggle .icon-sun  { display: none; }
+
+  /* -- SHOW HAMBURGER ON MOBILE, HIDE LINKS -- */
+  @media (max-width: 640px) {
+    .nav-links { display: none; }
+    .nav-hamburger { display: flex; }
+  }
+</style>
+
+<script>
+  // -- HAMBURGER / DRAWER --
+  const hamburger = document.getElementById('nav-hamburger');
+  const drawer    = document.getElementById('nav-drawer');
+  const overlay   = document.getElementById('nav-overlay');
+  const closeBtn  = document.getElementById('nav-drawer-close');
+
+  function openDrawer()  { drawer?.classList.add('open'); overlay?.classList.add('open'); document.body.style.overflow = 'hidden'; }
+  function closeDrawer() { drawer?.classList.remove('open'); overlay?.classList.remove('open'); document.body.style.overflow = ''; }
+
+  hamburger?.addEventListener('click', openDrawer);
+  closeBtn?.addEventListener('click', closeDrawer);
+  overlay?.addEventListener('click', closeDrawer);
+  drawer?.querySelectorAll('a').forEach(a => a.addEventListener('click', closeDrawer));
+
+  // -- DARK MODE TOGGLE --
+  const toggleBtn = document.getElementById('theme-toggle');
+  const html      = document.documentElement;
+
+  function setTheme(theme) {
+    html.setAttribute('data-theme', theme);
+    localStorage.setItem('mtg-theme', theme);
+  }
+
+  toggleBtn?.addEventListener('click', () => {
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    setTheme(isDark ? 'light' : 'dark');
+  });
+</script>
+
+</body>
+</html>

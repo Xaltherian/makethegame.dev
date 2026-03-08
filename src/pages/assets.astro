@@ -1,0 +1,135 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Free Assets · Make The Game" activeNav="assets">
+
+<style is:global>
+  .page-hero { background:var(--ink); padding:4rem 5rem 3.5rem; position:relative; overflow:hidden; }
+  .page-hero::after { content:''; position:absolute; right:-60px; top:-60px; width:380px; height:380px; background:radial-gradient(circle,rgba(201,151,58,.11) 0%,transparent 65%); pointer-events:none; }
+  .page-hero-label { font-size:.72rem; font-weight:500; letter-spacing:.14em; text-transform:uppercase; color:rgba(240,201,122,.65); margin-bottom:.5rem; }
+  .page-hero h1 { font-family:"Lora",serif; font-size:2.4rem; color:var(--cream); line-height:1.2; margin-bottom:.6rem; }
+  .page-hero h1 em { font-style:italic; color:var(--gold-light); }
+  .page-hero p { font-size:.92rem; color:rgba(245,240,232,.55); max-width:520px; line-height:1.75; }
+  .assets-wrap { padding:3.5rem 5rem 6rem; }
+  .category-header { display:flex; align-items:center; gap:.75rem; margin:2.5rem 0 1.25rem; padding-bottom:.9rem; border-bottom:1.5px solid var(--border); }
+  .cat-icon { font-size:1.4rem; }
+  .cat-title { font-family:"Lora",serif; font-size:1.15rem; font-weight:600; color:var(--ink); }
+  .cat-count { font-size:.75rem; color:var(--ink-soft); background:var(--cream-dark); border:1px solid var(--border); padding:.15rem .55rem; border-radius:100px; font-family:"DM Mono",monospace; }
+  .assets-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(290px,1fr)); gap:1.1rem; }
+  .asset-card { background:var(--paper); border:1.5px solid var(--border); border-radius:12px; padding:1.6rem; display:flex; flex-direction:column; gap:.4rem; transition:transform .2s, box-shadow .2s; }
+  .asset-card:hover { transform:translateY(-3px); box-shadow:0 10px 28px var(--shadow); }
+  .asset-icon { font-size:2rem; margin-bottom:.5rem; display:block; }
+  .asset-title { font-family:"Lora",serif; font-size:1rem; font-weight:600; color:var(--ink); }
+  .asset-desc { font-size:.845rem; color:var(--ink-soft); line-height:1.65; flex:1; }
+  .asset-meta { display:flex; align-items:center; gap:.6rem; margin-top:.75rem; flex-wrap:wrap; }
+  .asset-size { font-family:"DM Mono",monospace; font-size:.72rem; color:var(--ink-soft); }
+  .asset-tag { font-size:.68rem; font-weight:500; letter-spacing:.06em; text-transform:uppercase; padding:.18rem .5rem; border-radius:3px; }
+  .tag-free { color:var(--sage); background:rgba(107,140,107,.1); border:1px solid rgba(107,140,107,.25); }
+  .tag-pdf  { color:var(--rust); background:rgba(196,82,42,.08); border:1px solid rgba(196,82,42,.2); }
+  .asset-btn { display:inline-flex; align-items:center; gap:.4rem; margin-top:1rem; background:var(--ink); color:var(--cream); border:none; border-radius:6px; padding:.6rem 1.1rem; font-size:.82rem; font-weight:500; font-family:"DM Sans",sans-serif; cursor:pointer; text-decoration:none; transition:background .2s, transform .15s; }
+  .asset-btn:hover { background:#3d2f22; transform:translateY(-1px); }
+  .kofi-strip { background:var(--cream-dark); border:1.5px solid var(--border); border-radius:12px; padding:2rem 2.25rem; display:flex; align-items:center; justify-content:space-between; gap:2rem; margin-bottom:3rem; flex-wrap:wrap; }
+  .kofi-strip h3 { font-family:"Lora",serif; font-size:1.1rem; color:var(--ink); margin-bottom:.35rem; }
+  .kofi-strip p  { font-size:.855rem; color:var(--ink-soft); line-height:1.65; max-width:520px; }
+  @media(max-width:860px){ .page-hero{padding:3rem 1.75rem} .assets-wrap{padding:2.5rem 1.75rem 4rem} }
+</style>
+
+<div class="page-hero">
+  <div class="page-hero-label">🎁 Free Downloads</div>
+  <h1>Assets &amp; tools —<br><em>no strings attached.</em></h1>
+  <p>Everything here is free, forever. Things I made while building this course that might save you a few hours. No sign-up required — just download and use.</p>
+</div>
+
+<div class="assets-wrap">
+  <div class="kofi-strip">
+    <div>
+      <h3>Everything here is free — but if it helped you ☕</h3>
+      <p>These assets took real time to make. If they saved you hours, buying me a coffee means a lot and keeps me motivated to make more. No pressure at all.</p>
+    </div>
+    <a href="https://ko-fi.com" target="_blank" class="btn-primary">Support on Ko-fi →</a>
+  </div>
+
+  <div class="category-header">
+    <span class="cat-icon">🎨</span>
+    <span class="cat-title">Sprites & Art</span>
+    <span class="cat-count">2 packs</span>
+  </div>
+  <div class="assets-grid">
+    <div class="asset-card">
+      <span class="asset-icon">🎨</span>
+      <div class="asset-title">Starter Sprite Pack</div>
+      <div class="asset-desc">A clean, consistent set of 2D sprites — characters, platform tiles, collectibles, and UI elements. Designed for beginners who want to focus on learning Unity, not on making art.</div>
+      <div class="asset-meta"><span class="asset-tag tag-free">Free</span><span class="asset-size">~12 MB · PNG · 16×16 & 32×32</span></div>
+      <a href="#" class="asset-btn">↓ Download</a>
+    </div>
+    <div class="asset-card">
+      <span class="asset-icon">🌲</span>
+      <div class="asset-title">Platformer Tileset</div>
+      <div class="asset-desc">A 32×32 pixel tileset built specifically for Module 4's platformer. Includes ground tiles, background layers, and decorative props. Compatible with Unity's Tilemap system.</div>
+      <div class="asset-meta"><span class="asset-tag tag-free">Free</span><span class="asset-size">~8 MB · PNG slicesheet</span></div>
+      <a href="#" class="asset-btn">↓ Download</a>
+    </div>
+  </div>
+
+  <div class="category-header">
+    <span class="cat-icon">🔊</span>
+    <span class="cat-title">Audio</span>
+    <span class="cat-count">1 pack</span>
+  </div>
+  <div class="assets-grid">
+    <div class="asset-card">
+      <span class="asset-icon">🔊</span>
+      <div class="asset-title">8-Bit Sound Effect Kit</div>
+      <div class="asset-desc">30 royalty-free sound effects — jumps, coin pickups, hits, explosions, button clicks, and game over stings. All in .wav format, ready to drag straight into Unity's AudioClip slots.</div>
+      <div class="asset-meta"><span class="asset-tag tag-free">Free</span><span class="asset-size">~6 MB · WAV · Royalty-free</span></div>
+      <a href="#" class="asset-btn">↓ Download</a>
+    </div>
+  </div>
+
+  <div class="category-header">
+    <span class="cat-icon">📦</span>
+    <span class="cat-title">Unity Project Templates</span>
+    <span class="cat-count">1 template</span>
+  </div>
+  <div class="assets-grid">
+    <div class="asset-card">
+      <span class="asset-icon">📦</span>
+      <div class="asset-title">Unity 2022 LTS Starter Template</div>
+      <div class="asset-desc">The exact project structure and settings used throughout this course — pre-organised folders, sensible quality settings, and VS Code already connected. Import it and start a new project in seconds.</div>
+      <div class="asset-meta"><span class="asset-tag tag-free">Free</span><span class="asset-size">~2 MB · .unitypackage</span></div>
+      <a href="#" class="asset-btn">↓ Download</a>
+    </div>
+  </div>
+
+  <div class="category-header">
+    <span class="cat-icon">📄</span>
+    <span class="cat-title">Printables & References</span>
+    <span class="cat-count">3 PDFs</span>
+  </div>
+  <div class="assets-grid">
+    <div class="asset-card">
+      <span class="asset-icon">📄</span>
+      <div class="asset-title">C# Cheat Sheet</div>
+      <div class="asset-desc">A single-page reference for the C# patterns used most in Unity — variables, loops, coroutines, events, and common Unity methods. Print it, stick it on your wall, thank yourself later.</div>
+      <div class="asset-meta"><span class="asset-tag tag-pdf">PDF</span><span class="asset-size">1 page · A4 & US Letter</span></div>
+      <a href="#" class="asset-btn">↓ Download</a>
+    </div>
+    <div class="asset-card">
+      <span class="asset-icon">🗺️</span>
+      <div class="asset-title">Course Progress Printout</div>
+      <div class="asset-desc">A printable checklist of every lesson in the course. There is something uniquely satisfying about ticking boxes with a real pen that no progress bar can replicate.</div>
+      <div class="asset-meta"><span class="asset-tag tag-pdf">PDF</span><span class="asset-size">2 pages · A4 & US Letter</span></div>
+      <a href="#" class="asset-btn">↓ Download</a>
+    </div>
+    <div class="asset-card">
+      <span class="asset-icon">🎲</span>
+      <div class="asset-title">Game Idea Generator</div>
+      <div class="asset-desc">50 small, beginner-friendly game concepts with scope estimates so you know what you are getting into before you start. Organised by complexity — from 1-day projects to 2-week builds.</div>
+      <div class="asset-meta"><span class="asset-tag tag-pdf">PDF</span><span class="asset-size">4 pages</span></div>
+      <a href="#" class="asset-btn">↓ Download</a>
+    </div>
+  </div>
+</div>
+
+</BaseLayout>

@@ -1,0 +1,197 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Make The Game — Free Unity Course for Beginners" activeNav="">
+
+<style is:global>
+  .hero {
+    min-height: 91vh; display: grid; grid-template-columns: 1fr 1fr;
+    align-items: center; gap: 4rem; padding: 5rem 5rem 4rem;
+    position: relative; overflow: hidden;
+  }
+  .hero::after { content: ''; position: absolute; right: -120px; top: -120px; width: 560px; height: 560px; background: radial-gradient(circle, rgba(201,151,58,.11) 0%, transparent 68%); pointer-events: none; }
+  .hero-eyebrow { display: inline-flex; align-items: center; gap: .5rem; font-size: .76rem; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--rust); padding: .32rem .75rem; border-radius: 100px; border: 1.5px solid rgba(196,82,42,.3); background: rgba(196,82,42,.06); margin-bottom: 1.1rem; }
+  .hero h1 { font-family: "Lora", serif; font-size: clamp(2.4rem, 3.8vw, 3.5rem); line-height: 1.15; color: var(--ink); margin-bottom: 1.4rem; }
+  .hero h1 em { font-style: italic; color: var(--rust); }
+  .hero-sub { font-size: 1.02rem; line-height: 1.8; color: var(--ink-soft); max-width: 460px; margin-bottom: 2.25rem; }
+  .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
+  .hero-note { font-size: .78rem; color: var(--ink-soft); margin-top: .9rem; display: flex; align-items: center; gap: .4rem; }
+  .hero-note::before { content: '✦'; color: var(--gold); font-size: .62rem; }
+  .hero-visual { display: flex; justify-content: center; align-items: center; }
+  .card-stack { position: relative; width: 340px; height: 400px; }
+  .card-stack .hcard { position: absolute; width: 300px; border-radius: 12px; padding: 1.5rem; border: 1.5px solid var(--border); background: var(--paper); box-shadow: 0 8px 30px var(--shadow); }
+  .hcard-b2 { top:28px;left:38px;background:var(--cream-dark)!important;transform:rotate(4deg);opacity:.55;z-index:1; }
+  .hcard-b1 { top:14px;left:18px;transform:rotate(2deg);opacity:.78;z-index:2; }
+  .hcard-f  { top:0;left:0;z-index:3; animation: floatCard 5s ease-in-out infinite; }
+  @keyframes floatCard { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-9px) rotate(.3deg)} }
+  .hcard-tag { display: inline-block; font-size:.68rem; font-weight:500; letter-spacing:.09em; text-transform:uppercase; color:var(--sage); background:rgba(107,140,107,.1); border:1px solid rgba(107,140,107,.28); padding:.2rem .6rem; border-radius:100px; margin-bottom:.7rem; }
+  .hcard-title { font-family:"Lora",serif; font-size:1.05rem; font-weight:600; color:var(--ink); margin-bottom:.4rem; }
+  .hcard-desc  { font-size:.8rem; color:var(--ink-soft); line-height:1.6; margin-bottom:1.1rem; }
+  .hcard-bar-label { display:flex; justify-content:space-between; font-size:.7rem; color:var(--ink-soft); margin-bottom:.3rem; font-family:"DM Mono",monospace; }
+  .hcard-bar { height:5px; background:var(--cream-dark); border-radius:100px; overflow:hidden; }
+  .hcard-fill { height:100%; width:37%; background:linear-gradient(90deg,var(--rust),var(--gold)); border-radius:100px; }
+  .hcard-lessons { margin-top:1rem; display:flex; flex-direction:column; gap:.38rem; }
+  .hcard-row { display:flex; align-items:center; gap:.5rem; font-size:.76rem; color:var(--ink-soft); }
+  .hdot { width:7px;height:7px;border-radius:50%;flex-shrink:0; }
+  .hdot-done{background:var(--sage)} .hdot-active{background:var(--rust)} .hdot-todo{background:var(--border)}
+  .summary-strip { background: var(--ink); padding: 5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center; }
+  .summary-strip h2 { font-family:"Lora",serif; font-size:2rem; line-height:1.3; color:var(--cream); margin-bottom:1.1rem; }
+  .summary-strip h2 em { font-style:italic; color:var(--gold-light); }
+  .summary-strip p { font-size:.92rem; line-height:1.85; color:rgba(245,240,232,.68); margin-bottom:.9rem; }
+  .summary-cta { margin-top:1.75rem; display:flex; gap:1rem; flex-wrap:wrap; }
+  .btn-gold { display:inline-flex; align-items:center; gap:.45rem; background:var(--gold); color:var(--ink); padding:.72rem 1.6rem; border-radius:6px; font-size:.92rem; font-weight:500; text-decoration:none; transition:background .2s, transform .15s; box-shadow: 0 4px 14px rgba(201,151,58,.3); }
+  .btn-gold:hover { background:var(--gold-light); transform:translateY(-2px); }
+  .btn-outline-light { display:inline-flex; align-items:center; gap:.45rem; background:transparent; color:rgba(245,240,232,.8); padding:.72rem 1.4rem; border-radius:6px; font-size:.92rem; font-weight:500; text-decoration:none; border:1.5px solid rgba(245,240,232,.18); transition:border-color .2s, background .2s; }
+  .btn-outline-light:hover { border-color:rgba(245,240,232,.4); background:rgba(245,240,232,.06); }
+  .summary-stats { display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; }
+  .stat-card { background:rgba(245,240,232,.05); border:1px solid rgba(245,240,232,.1); border-radius:10px; padding:1.4rem; }
+  .stat-num { font-family:"Lora",serif; font-size:2.2rem; font-weight:600; color:var(--gold-light); line-height:1; margin-bottom:.3rem; }
+  .stat-lbl { font-size:.8rem; color:rgba(245,240,232,.5); line-height:1.4; }
+  .path-section { padding: 5.5rem 5rem; }
+  .path-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.25rem; margin-top:2.75rem; }
+  .path-card { background:var(--paper); border:1.5px solid var(--border); border-radius:12px; padding:1.75rem; transition:transform .2s, box-shadow .2s; }
+  .path-card:hover { transform:translateY(-4px); box-shadow:0 12px 32px var(--shadow); }
+  .path-icon { font-size:1.8rem; margin-bottom:.9rem; display:block; }
+  .path-card h3 { font-family:"Lora",serif; font-size:1.05rem; font-weight:600; color:var(--ink); margin-bottom:.45rem; }
+  .path-card p  { font-size:.845rem; color:var(--ink-soft); line-height:1.65; margin-bottom:1.1rem; }
+  .path-tag { font-size:.7rem; font-weight:500; letter-spacing:.08em; text-transform:uppercase; color:var(--rust); display:flex; align-items:center; gap:.35rem; }
+  .free-assets { background:var(--cream-dark); border-top:1.5px solid var(--border); border-bottom:1.5px solid var(--border); padding:4.5rem 5rem; display:grid; grid-template-columns:1fr auto; gap:3rem; align-items:center; }
+  .free-assets h2 { font-family:"Lora",serif; font-size:1.8rem; color:var(--ink); margin-bottom:.6rem; }
+  .free-assets h2 em { font-style:italic; color:var(--rust); }
+  .free-assets p { font-size:.9rem; color:var(--ink-soft); line-height:1.75; max-width:520px; }
+  .freebie-chips { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:1rem; }
+  .chip { font-size:.75rem; font-weight:500; color:var(--ink-soft); background:var(--paper); border:1.5px solid var(--border); padding:.28rem .75rem; border-radius:100px; }
+  .newsletter { background:var(--ink); padding:5rem; display:grid; grid-template-columns:1fr 1fr; gap:5rem; align-items:center; }
+  .newsletter h2 { font-family:"Lora",serif; font-size:1.9rem; color:var(--cream); line-height:1.3; margin-bottom:.9rem; }
+  .newsletter h2 em { font-style:italic; color:var(--gold-light); }
+  .newsletter p { font-size:.9rem; color:rgba(245,240,232,.6); line-height:1.8; }
+  .nl-perks { display:flex; flex-direction:column; gap:.65rem; margin-top:1.4rem; }
+  .nl-perk { display:flex; align-items:flex-start; gap:.65rem; font-size:.855rem; color:rgba(245,240,232,.65); line-height:1.5; }
+  .nl-dot { width:5px;height:5px;border-radius:50%;background:var(--gold-light);flex-shrink:0;margin-top:.45rem; }
+  .nl-form { display:flex;flex-direction:column;gap:.85rem; }
+  .nl-form-label { font-family:"Lora",serif; font-size:1.05rem; color:rgba(245,240,232,.85); }
+  .nl-row { display:flex; border:1.5px solid rgba(245,240,232,.18); border-radius:7px; overflow:hidden; transition:border-color .2s; }
+  .nl-row:focus-within { border-color:var(--gold-light); }
+  .nl-row input { flex:1; background:rgba(245,240,232,.06); border:none; outline:none; padding:.85rem 1.1rem; font-family:"DM Sans",sans-serif; font-size:.9rem; color:var(--cream); }
+  .nl-row input::placeholder { color:rgba(245,240,232,.3); }
+  .nl-row button { background:var(--rust); color:#fff; border:none; padding:.85rem 1.4rem; font-family:"DM Sans",sans-serif; font-size:.88rem; font-weight:500; cursor:pointer; white-space:nowrap; transition:background .2s; }
+  .nl-row button:hover { background:#a8401e; }
+  .nl-note { font-size:.76rem; color:rgba(245,240,232,.35); }
+  @media(max-width:980px){
+    .hero{grid-template-columns:1fr;padding:3.5rem 2rem} .hero-visual{display:none}
+    .summary-strip{grid-template-columns:1fr;padding:3.5rem 2rem;gap:2.5rem}
+    .path-section{padding:4rem 2rem} .path-grid{grid-template-columns:1fr 1fr}
+    .free-assets{grid-template-columns:1fr;padding:3.5rem 2rem}
+    .newsletter{grid-template-columns:1fr;padding:3.5rem 2rem;gap:2.5rem}
+  }
+  @media(max-width:600px){ .path-grid{grid-template-columns:1fr} }
+</style>
+
+<section class="hero fade-up">
+  <div>
+    <div class="hero-eyebrow">✦ Free course · Complete beginners · No sign-up</div>
+    <h1><em>Make The Game</em></h1>
+    <h1><div>you've always wanted.</div></h1>
+    <p class="hero-sub">A <em style="font-family:Lora,serif;font-style:italic;color:var(--rust)">free</em> Unity course that introduces and explains all of Unity's capabilities by making a whole lot of games.</p>
+    <div class="hero-actions">
+      <a href="/assets" class="btn-primary">Free Assets →</a>
+      <a href="#about" class="btn-secondary">About the course</a>
+    </div>
+    <p class="hero-note">No account needed to read. Progress tracking is optional and saves in your browser.</p>
+  </div>
+  <div class="hero-visual">
+    <div class="card-stack">
+      <div class="hcard hcard-b2"></div>
+      <div class="hcard hcard-b1"></div>
+      <div class="hcard hcard-f">
+        <div class="hcard-tag">Module 2 · 2D Game</div>
+        <div class="hcard-title">Catch the Ball</div>
+        <div class="hcard-desc">Your first complete game — sprites, physics, score, and game over. Built from scratch.</div>
+        <div class="hcard-bar-label"><span>Progress</span><span>3 / 7 lessons</span></div>
+        <div class="hcard-bar"><div class="hcard-fill"></div></div>
+        <div class="hcard-lessons">
+          <div class="hcard-row"><div class="hdot hdot-done"></div><span>2.1 · Sprites & Images</span></div>
+          <div class="hcard-row"><div class="hdot hdot-done"></div><span>2.2 · Rigidbody & Gravity</span></div>
+          <div class="hcard-row"><div class="hdot hdot-done"></div><span>2.3 · Colliders</span></div>
+          <div class="hcard-row"><div class="hdot hdot-active"></div><span>2.4 · Your First Script ← here</span></div>
+          <div class="hcard-row"><div class="hdot hdot-todo"></div><span>2.5 · Keeping Score</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="summary-strip" id="about">
+  <div class="fade-up-1">
+    <h2>Made by someone who<br><em>hit every wall.</em></h2>
+    <p>I have been developing games for 6 years. I never shipped even a single game because the games that I worked on were all over-ambitious and I soon lost the motivation to work on them. But during that time, I made games from a whole lot of genre's and deeply understood every feature and limitation that Unity had to offer. </p>
+    <p>Along the way I got good at explaining it — mostly because I spent a lot of time helping people on discord. I got a lot of positive feedback from people so I built the course I wish existed when I started.</p>
+    <p>N modules, M lessons, L games you build yourself, Everything 100% Free and doesn't assume any prerequisite knowledge.</p>
+    <div class="summary-cta">
+      <a href="/assets" class="btn-gold">Browse free assets →</a>
+      <a href="/#newsletter" class="btn-outline-light">Newsletter</a>
+    </div>
+  </div>
+  <div class="summary-stats fade-up-2">
+    <div class="stat-card"><div class="stat-num">N</div><div class="stat-lbl">Modules, from setup to publishing</div></div>
+    <div class="stat-card"><div class="stat-num">M</div><div class="stat-lbl">Lessons, each building on the last</div></div>
+    <div class="stat-card"><div class="stat-num">L</div><div class="stat-lbl">Games or Subsystems that you build yourself</div></div>
+    <div class="stat-card"><div class="stat-num">$0</div><div class="stat-lbl">Always free</div></div>
+  </div>
+</section>
+
+<section class="path-section">
+  <div class="page-wrap">
+    <div class="fade-up">
+      <span class="label">The Path</span>
+      <h2 class="section-title">Where the course takes you</h2>
+      <p class="section-sub">Each module builds naturally on the one before it. You never jump ahead — everything is earned.</p>
+    </div>
+    <div class="path-grid">
+      <div class="path-card fade-up"><span class="path-icon">🖥️</span><h3>Lesson 0 — Setup</h3><p>From a clean Windows install to a fully working Unity environment. Nothing assumed, nothing skipped.</p><div class="path-tag">→ Start here · 45 min</div></div>
+      <div class="path-card fade-up-1"><span class="path-icon">🧭</span><h3>Module 1 — The Editor</h3><p>A proper tour of every Unity panel and tool before you write a single line of code.</p><div class="path-tag">→ ~3 hours</div></div>
+      <div class="path-card fade-up-2"><span class="path-icon">🎮</span><h3>Modules 2 & 3 — First Games</h3><p>Build two complete 2D games while learning C# from scratch. Physics, collisions, scoring, enemies.</p><div class="path-tag">→ ~11 hours · 2 games</div></div>
+      <div class="path-card fade-up"><span class="path-icon">🕹️</span><h3>Module 4 — Intermediate 2D</h3><p>Tilemaps, animation, a full HUD, sound effects, and Cinemachine. The biggest project in the course.</p><div class="path-tag">→ ~8 hours · Platformer</div></div>
+      <div class="path-card fade-up-1"><span class="path-icon">🌐</span><h3>Module 5 — Into 3D</h3><p>Everything you know, now in three dimensions. Meshes, materials, lighting, and 3D physics.</p><div class="path-tag">→ ~6 hours · 3D Roller</div></div>
+      <div class="path-card fade-up-2"><span class="path-icon">🚀</span><h3>Module 6 — Ship It</h3><p>Polish your game, add a main menu, optimise it, and publish it to PC, Mac, and the web.</p><div class="path-tag">→ ~5 hours · Full game</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="free-assets">
+  <div>
+    <h2>Free assets —<br><em>no strings attached.</em></h2>
+    <p>The assets I made for the games made in the course.</p>
+    <div class="freebie-chips">
+      <span class="chip">🎨 Starter Sprite Pack</span>
+      <span class="chip">🔊 8-bit Sound Kit</span>
+      <span class="chip">📦 Unity Template</span>
+      <span class="chip">📄 C# Cheat Sheet</span>
+      <span class="chip">🎲 Game Idea Generator</span>
+    </div>
+  </div>
+  <a href="/assets" class="btn-primary">Browse free assets →</a>
+</div>
+
+<section class="newsletter" id="newsletter">
+  <div>
+    <h2>A letter about<br><em>making games.</em></h2>
+    <p>Maybe once a month-ish. Game ideas, small dev lessons, tools worth knowing. No spam.</p>
+    <div class="nl-perks">
+      <div class="nl-perk"><div class="nl-dot"></div>One email a month — never more</div>
+      <div class="nl-perk"><div class="nl-dot"></div>Curated content every issue</div>
+      <div class="nl-perk"><div class="nl-dot"></div>Unsubscribe any time, no questions asked</div>
+    </div>
+  </div>
+  <div class="nl-form">
+    <div class="nl-form-label">Join the newsletter</div>
+    <div class="nl-row">
+      <input type="email" placeholder="your@email.com" />
+      <button>Subscribe →</button>
+    </div>
+    <div class="nl-note">No spam. Unsubscribe any time.</div>
+  </div>
+</section>
+
+</BaseLayout>
