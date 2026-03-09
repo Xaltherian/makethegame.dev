@@ -1,3 +1,22 @@
 {
-  "modules": []
+  "modules": [
+    {
+      "slug": "getting-started",
+      "title": "Getting Started",
+      "icon": "📦",
+      "chapters": [
+        {
+          "slug": "introduction",
+          "title": "Introduction",
+          "lessons": [
+            {
+              "slug": "about-makethegame",
+              "title": "About MakeTheGame",
+              "order": 1
+            }
+          ]
+        }
+      ]
+    }
+  ]
 }

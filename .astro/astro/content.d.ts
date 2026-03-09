@@ -150,14 +150,15 @@ declare module 'astro:content' {
 	>;
 
 	type ContentEntryMap = {
-		"lessons": Record<string, {
-  id: string;
-  slug: string;
+		"lessons": {
+"getting-started/introduction/about-makethegame.mdx": {
+	id: "getting-started/introduction/about-makethegame.mdx";
+  slug: "getting-started/introduction/about-makethegame";
   body: string;
   collection: "lessons";
-  data: InferEntrySchema<"lessons">;
-  render(): Render[".md"];
-}>;
+  data: InferEntrySchema<"lessons">
+} & { render(): Render[".mdx"] };
+};
 "readmes": Record<string, {
   id: string;
   slug: string;
