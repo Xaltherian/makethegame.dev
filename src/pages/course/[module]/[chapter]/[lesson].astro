@@ -162,8 +162,18 @@ const currentSlug = `${moduleSlug}/${chapterSlug}/${lessonSlug}`;
 
 <script define:vars={{ currentSlug, chapterLessonsData, moduleSlug, chapterSlug }}>
   // ── PROGRESS HELPERS ───────────────────────────────────────────
+  const knownChapterSlugs = new Set(
+    chapterLessonsData.map(l => `${moduleSlug}/${chapterSlug}/${l.slug}`)
+  );
+
   function getProgress() {
-    try { return JSON.parse(localStorage.getItem('mtg-progress') || '[]'); }
+    try {
+      const raw = JSON.parse(localStorage.getItem('mtg-progress') || '[]');
+      // On lesson pages we only clean slugs for this chapter to avoid
+      // accidentally wiping progress from other modules not loaded here.
+      // Full cross-module cleaning happens on the course index page.
+      return raw;
+    }
     catch { return []; }
   }
   function saveProgress(arr) {

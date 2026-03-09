@@ -105,8 +105,16 @@ const ReadmeContent = readmeContent?.Content ?? null;
 </BaseLayout>
 
 <script define:vars={{ mod, totalLessons, allSlugs }}>
+  const allKnownSlugs = new Set(allSlugs);
+
   function getProgress() {
-    try { return JSON.parse(localStorage.getItem('mtg-progress') || '[]'); }
+    try {
+      const raw = JSON.parse(localStorage.getItem('mtg-progress') || '[]');
+      const cleaned = raw.filter(s => allKnownSlugs.has(s));
+      if (cleaned.length !== raw.length)
+        localStorage.setItem('mtg-progress', JSON.stringify(cleaned));
+      return cleaned;
+    }
     catch { return []; }
   }
 

@@ -88,8 +88,23 @@ const totalLessons = courseData.modules.reduce((t, m) =>
 </BaseLayout>
 
 <script define:vars={{ courseData, totalLessons }}>
+  const allKnownSlugs = new Set(
+    courseData.modules.flatMap(m =>
+      m.chapters.flatMap(c =>
+        c.lessons.map(l => `${m.slug}/${c.slug}/${l.slug}`)
+      )
+    )
+  );
+
   function getProgress() {
-    try { return JSON.parse(localStorage.getItem('mtg-progress') || '[]'); }
+    try {
+      const raw = JSON.parse(localStorage.getItem('mtg-progress') || '[]');
+      // Strip out any slugs that no longer exist, and save back the cleaned list
+      const cleaned = raw.filter(s => allKnownSlugs.has(s));
+      if (cleaned.length !== raw.length)
+        localStorage.setItem('mtg-progress', JSON.stringify(cleaned));
+      return cleaned;
+    }
     catch { return []; }
   }
 

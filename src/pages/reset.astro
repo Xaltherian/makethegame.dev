@@ -1,0 +1,19 @@
+---
+// No rendering — this page just runs a script and redirects immediately.
+---
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Resetting progress…</title>
+</head>
+<body>
+<script>
+  localStorage.removeItem('mtg-progress');
+  // Also clear any readme collapse states
+  Object.keys(localStorage)
+    .filter(k => k.startsWith('mtg-readme-'))
+    .forEach(k => localStorage.removeItem(k));
+  window.location.replace('/course');
+</script>
+</body>
+</html>
