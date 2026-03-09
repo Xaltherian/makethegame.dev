@@ -1,0 +1,291 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import courseData from '../../../../data/course.json';
+import '../../../../styles/lesson.css';
+
+export async function getStaticPaths() {
+  const allEntries = await getCollection('lessons');
+  return allEntries.map(entry => {
+    const parts = entry.id.replace('.mdx', '').split('/');
+    const [moduleSlug, chapterSlug, lessonSlug] = parts;
+    return {
+      params: { module: moduleSlug, chapter: chapterSlug, lesson: lessonSlug },
+      props: { entry }
+    };
+  });
+}
+
+const { entry } = Astro.props;
+const { module: moduleSlug, chapter: chapterSlug, lesson: lessonSlug } = Astro.params;
+
+// Render the current lesson
+const { Content, headings } = await entry.render();
+
+// Find this module + chapter in course data
+const modData = courseData.modules.find(m => m.slug === moduleSlug);
+const chData = modData?.chapters.find(c => c.slug === chapterSlug);
+const lessonIdx = chData?.lessons.findIndex(l => l.slug === lessonSlug) ?? 0;
+
+// Prev / Next within chapter
+const prevLesson = lessonIdx > 0 ? chData?.lessons[lessonIdx - 1] : null;
+const nextLesson = chData && lessonIdx < chData.lessons.length - 1
+  ? chData.lessons[lessonIdx + 1] : null;
+
+// Get headings for all lessons in this chapter (for the sidebar)
+const allEntries = await getCollection('lessons');
+const chapterLessonsData = await Promise.all(
+  (chData?.lessons ?? []).map(async (lesInfo) => {
+    const e = allEntries.find(
+      en => en.id === `${moduleSlug}/${chapterSlug}/${lesInfo.slug}.mdx`
+    );
+    const h = e ? (await e.render()).headings : [];
+    return {
+      slug: lesInfo.slug,
+      title: lesInfo.title,
+      order: lesInfo.order,
+      headings: h.filter(hd => hd.depth <= 3),
+      isCurrent: lesInfo.slug === lessonSlug,
+    };
+  })
+);
+
+const currentSlug = `${moduleSlug}/${chapterSlug}/${lessonSlug}`;
+---
+
+<BaseLayout
+  title={`${entry.data.title} · ${chData?.title} · Make The Game`}
+  activeNav="course"
+>
+
+<div class="lesson-page">
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside class="lesson-sidebar" id="lesson-sidebar">
+    <div class="sidebar-chapter-label">Chapter</div>
+    <div class="sidebar-chapter-name">{chData?.title}</div>
+
+    <nav class="sidebar-lessons" id="sidebar-lessons">
+      {chapterLessonsData.map((les, idx) => (
+        <div class="sidebar-lesson" data-slug={les.slug}>
+          <button
+            class={`sidebar-lesson-btn ${les.isCurrent ? 'is-current open' : ''}`}
+            data-slug={les.slug}
+            aria-expanded={les.isCurrent ? 'true' : 'false'}
+          >
+            <span class="sidebar-lesson-num">{String(les.order).padStart(2,'0')}</span>
+            <span class="sidebar-lesson-title">{les.title}</span>
+            <span class="sidebar-done-dot" id={`sdot-${les.slug}`}></span>
+            {les.headings.length > 0 && (
+              <span class="sidebar-chevron">▸</span>
+            )}
+          </button>
+
+          {les.headings.length > 0 && (
+            <div class={`sidebar-toc ${les.isCurrent ? 'open' : ''}`} id={`stoc-${les.slug}`}>
+              {les.headings.map(h => (
+                <a
+                  href={les.isCurrent ? `#${h.slug}` : `/course/${moduleSlug}/${chapterSlug}/${les.slug}#${h.slug}`}
+                  class="sidebar-toc-item"
+                  data-slug={h.slug}
+                  data-depth={h.depth}
+                  style={h.depth === 3 ? 'padding-left:1rem' : ''}
+                >
+                  {h.text}
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
+    </nav>
+
+    <a href={`/course/${moduleSlug}`} class="sidebar-back">← Back to Module</a>
+  </aside>
+
+  <!-- ═══ MAIN CONTENT ═══ -->
+  <main class="lesson-main">
+    <div class="lesson-breadcrumb">
+      <a href="/course">Course</a>
+      <span>›</span>
+      <a href={`/course/${moduleSlug}`}>{modData?.title}</a>
+      <span>›</span>
+      <span>{chData?.title}</span>
+    </div>
+
+    <div class="lesson-eyebrow">
+      Lesson {lessonIdx + 1} of {chData?.lessons.length}
+    </div>
+    <h1 class="lesson-title">{entry.data.title}</h1>
+    {entry.data.description && (
+      <p class="lesson-desc">{entry.data.description}</p>
+    )}
+
+    <div class="lesson-body" id="lesson-body">
+      <Content />
+    </div>
+
+    <!-- ── LESSON NAVIGATION ── -->
+    <div class="lesson-nav">
+      {prevLesson ? (
+        <a href={`/course/${moduleSlug}/${chapterSlug}/${prevLesson.slug}`} class="lesson-nav-prev">
+          ← {prevLesson.title}
+        </a>
+      ) : (
+        <a href={`/course/${moduleSlug}`} class="lesson-nav-prev">
+          ← Back to Module
+        </a>
+      )}
+
+      <div class="lesson-nav-spacer"></div>
+
+      <button class="btn-complete" id="complete-btn" data-slug={currentSlug}>
+        <span id="complete-icon">○</span>
+        <span id="complete-label">Mark as Complete</span>
+      </button>
+
+      {nextLesson ? (
+        <a href={`/course/${moduleSlug}/${chapterSlug}/${nextLesson.slug}`} class="lesson-nav-next">
+          {nextLesson.title} →
+        </a>
+      ) : (
+        <a href={`/course/${moduleSlug}`} class="lesson-nav-next">
+          Back to Module →
+        </a>
+      )}
+    </div>
+  </main>
+
+</div>
+
+</BaseLayout>
+
+<script define:vars={{ currentSlug, chapterLessonsData, moduleSlug, chapterSlug }}>
+  // ── PROGRESS HELPERS ───────────────────────────────────────────
+  function getProgress() {
+    try { return JSON.parse(localStorage.getItem('mtg-progress') || '[]'); }
+    catch { return []; }
+  }
+  function saveProgress(arr) {
+    localStorage.setItem('mtg-progress', JSON.stringify(arr));
+  }
+
+  // ── MARK AS COMPLETE BUTTON ────────────────────────────────────
+  function syncCompleteBtn() {
+    const done = getProgress();
+    const btn = document.getElementById('complete-btn');
+    const icon = document.getElementById('complete-icon');
+    const label = document.getElementById('complete-label');
+    if (!btn) return;
+    if (done.includes(currentSlug)) {
+      btn.classList.add('completed');
+      if (icon) icon.textContent = '✓';
+      if (label) label.textContent = 'Completed';
+    } else {
+      btn.classList.remove('completed');
+      if (icon) icon.textContent = '○';
+      if (label) label.textContent = 'Mark as Complete';
+    }
+  }
+
+  document.getElementById('complete-btn')?.addEventListener('click', () => {
+    const done = getProgress();
+    const idx = done.indexOf(currentSlug);
+    if (idx === -1) {
+      done.push(currentSlug);
+    } else {
+      done.splice(idx, 1);
+    }
+    saveProgress(done);
+    syncCompleteBtn();
+    syncSidebarDots();
+  });
+
+  // ── SIDEBAR DONE DOTS ──────────────────────────────────────────
+  function syncSidebarDots() {
+    const done = getProgress();
+    for (const les of chapterLessonsData) {
+      const slug = `${moduleSlug}/${chapterSlug}/${les.slug}`;
+      const dot = document.getElementById(`sdot-${les.slug}`);
+      if (dot) dot.classList.toggle('visible', done.includes(slug));
+    }
+  }
+
+  // ── SIDEBAR EXPAND / COLLAPSE ──────────────────────────────────
+  document.querySelectorAll('.sidebar-lesson-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const slug = btn.dataset.slug;
+      const toc = document.getElementById(`stoc-${slug}`);
+      const isOpen = btn.classList.contains('open');
+      btn.classList.toggle('open', !isOpen);
+      btn.setAttribute('aria-expanded', String(!isOpen));
+      if (toc) toc.classList.toggle('open', !isOpen);
+    });
+  });
+
+  // ── ACTIVE HEADING TRACKING ───────────────────────────────────
+  const tocLinks = document.querySelectorAll('.sidebar-toc.open .sidebar-toc-item');
+  if (tocLinks.length > 0) {
+    const headingEls = Array.from(tocLinks)
+      .map(a => {
+        const id = a.getAttribute('href')?.replace('#','');
+        return id ? document.getElementById(id) : null;
+      })
+      .filter(Boolean);
+
+    let activeId = null;
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          activeId = entry.target.id;
+          tocLinks.forEach(a => {
+            const href = a.getAttribute('href')?.replace('#', '');
+            a.classList.toggle('active', href === activeId);
+          });
+        }
+      });
+    }, { rootMargin: '-60px 0px -60% 0px', threshold: 0 });
+
+    headingEls.forEach(el => { if (el) observer.observe(el); });
+  }
+
+  // ── COPY BUTTONS ON CODE BLOCKS ───────────────────────────────
+  document.querySelectorAll('.lesson-body pre').forEach(pre => {
+    const code = pre.querySelector('code');
+    if (!code) return;
+
+    const lang = (code.className.match(/language-(\w+)/) || [])[1] || 'code';
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'code-block';
+
+    const header = document.createElement('div');
+    header.className = 'code-header';
+    header.innerHTML = `
+      <span class="code-lang">${lang}</span>
+      <button class="code-copy">Copy</button>
+    `;
+
+    pre.parentNode.insertBefore(wrapper, pre);
+    wrapper.appendChild(header);
+    wrapper.appendChild(pre);
+
+    header.querySelector('.code-copy').addEventListener('click', async function() {
+      try {
+        await navigator.clipboard.writeText(code.innerText);
+        this.textContent = 'Copied!';
+        this.classList.add('copied');
+        setTimeout(() => {
+          this.textContent = 'Copy';
+          this.classList.remove('copied');
+        }, 2000);
+      } catch {}
+    });
+  });
+
+  // ── INIT ───────────────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', () => {
+    syncCompleteBtn();
+    syncSidebarDots();
+  });
+</script>

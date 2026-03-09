@@ -1,0 +1,241 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import courseData from '../../data/course.json';
+import '../../styles/lesson.css';
+
+// Compute totals for the data- attributes
+const totalLessons = courseData.modules.reduce((t, m) =>
+  t + m.chapters.reduce((ct, c) => ct + c.lessons.length, 0), 0);
+---
+
+<BaseLayout title="Course — Make The Game" activeNav="course">
+
+<section class="course-hero fade-up">
+  <div class="course-hero-label">✦ Free Unity Course</div>
+  <h1>Your <em>learning</em> journey.</h1>
+  <p class="course-hero-sub">
+    Every module, chapter, and lesson — all in one place. Your progress saves automatically in your browser.
+  </p>
+  <div class="overall-progress">
+    <div class="overall-progress-bar-wrap">
+      <div class="overall-progress-bar-fill" id="overall-fill"></div>
+    </div>
+    <span class="overall-progress-text" id="overall-text">0 / {totalLessons} lessons</span>
+  </div>
+  <div class="course-continue-btn">
+    <a href="#" id="course-cta" class="btn-primary">Start Course →</a>
+  </div>
+</section>
+
+<div class="course-modules">
+  <div class="course-modules-inner">
+    {courseData.modules.map((mod) => {
+      return (
+        <div class="module-card" id={`mod-${mod.slug}`} data-mod={mod.slug}>
+          <div class="module-card-header" data-toggle-mod={mod.slug}>
+            <span class="module-icon">{mod.icon}</span>
+            <div class="module-card-meta">
+              <div class="module-card-title">{mod.title}</div>
+              <div class="module-progress-wrap">
+                <div class="module-progress-bar">
+                  <div class="module-progress-fill" id={`mod-fill-${mod.slug}`}></div>
+                </div>
+                <span class="module-progress-pct" id={`mod-pct-${mod.slug}`}>0%</span>
+              </div>
+            </div>
+            <span class="module-expand-icon">▾</span>
+          </div>
+
+          <div class="module-card-body">
+            {mod.chapters.map((ch) => (
+              <div class="chapter-section" id={`ch-${mod.slug}-${ch.slug}`} data-mod={mod.slug} data-ch={ch.slug}>
+                <div class="chapter-header" data-toggle-ch={`${mod.slug}|||${ch.slug}`}>
+                  <span class="chapter-chevron">▸</span>
+                  <span class="chapter-title">{ch.title}</span>
+                  <span class="chapter-count">{ch.lessons.length} lessons</span>
+                  <span class="chapter-done-badge" id={`ch-badge-${mod.slug}-${ch.slug}`}>✓ Done</span>
+                </div>
+                <div class="chapter-lessons" id={`ch-lessons-${mod.slug}-${ch.slug}`}>
+                  {ch.lessons.map((les) => {
+                    const slug = `${mod.slug}/${ch.slug}/${les.slug}`;
+                    return (
+                      <a
+                        class="chapter-lesson-row"
+                        href={`/course/${mod.slug}/${ch.slug}/${les.slug}`}
+                        data-slug={slug}
+                      >
+                        <span class="lesson-check" id={`lcheck-${slug.replaceAll('/', '-')}`}></span>
+                        <span>{les.title}</span>
+                      </a>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+
+            <div class="module-card-actions">
+              <a href={`/course/${mod.slug}`} class="btn-primary" id={`mod-btn-${mod.slug}`}>
+                Start Module →
+              </a>
+            </div>
+          </div>
+        </div>
+      );
+    })}
+  </div>
+</div>
+
+</BaseLayout>
+
+<script define:vars={{ courseData, totalLessons }}>
+  function getProgress() {
+    try { return JSON.parse(localStorage.getItem('mtg-progress') || '[]'); }
+    catch { return []; }
+  }
+
+  function toggleModule(slug) {
+    document.getElementById(`mod-${slug}`)?.classList.toggle('open');
+  }
+
+  function toggleChapter(modSlug, chSlug) {
+    const section = document.getElementById(`ch-${modSlug}-${chSlug}`);
+    const lessons = document.getElementById(`ch-lessons-${modSlug}-${chSlug}`);
+    const isOpen = section?.classList.contains('open');
+    section?.classList.toggle('open', !isOpen);
+    if (lessons) lessons.style.display = isOpen ? 'none' : 'flex';
+  }
+
+  // Event delegation — handles all module and chapter clicks
+  document.addEventListener('click', (e) => {
+    const modHeader = e.target.closest('[data-toggle-mod]');
+    if (modHeader) {
+      toggleModule(modHeader.dataset.toggleMod);
+      return;
+    }
+    const chHeader = e.target.closest('[data-toggle-ch]');
+    if (chHeader) {
+      const [modSlug, chSlug] = chHeader.dataset.toggleCh.split('|||');
+      toggleChapter(modSlug, chSlug);
+    }
+  });
+
+  function updateUI() {
+    const done = getProgress();
+
+    // Overall progress
+    const pct = totalLessons > 0 ? Math.round((done.length / totalLessons) * 100) : 0;
+    const overallFill = document.getElementById('overall-fill');
+    const overallText = document.getElementById('overall-text');
+    if (overallFill) overallFill.style.width = pct + '%';
+    if (overallText) overallText.textContent = `${done.length} / ${totalLessons} lessons`;
+
+    // CTA button
+    const cta = document.getElementById('course-cta');
+    if (cta) {
+      if (done.length === 0) {
+        const first = courseData.modules[0];
+        if (first) {
+          const fc = first.chapters[0];
+          const fl = fc.lessons[0];
+          cta.href = `/course/${first.slug}/${fc.slug}/${fl.slug}`;
+        }
+        cta.textContent = 'Start Course →';
+      } else if (done.length >= totalLessons) {
+        cta.textContent = '🎉 Course Complete!';
+        cta.removeAttribute('href');
+      } else {
+        outer: for (const mod of courseData.modules) {
+          for (const ch of mod.chapters) {
+            for (const les of ch.lessons) {
+              const slug = `${mod.slug}/${ch.slug}/${les.slug}`;
+              if (!done.includes(slug)) {
+                cta.href = `/course/${mod.slug}/${ch.slug}/${les.slug}`;
+                cta.textContent = 'Continue Course →';
+                break outer;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // Per-module progress + lesson checks + open/close logic
+    let firstIncompleteModOpened = false;
+
+    for (const mod of courseData.modules) {
+      const modLessons = mod.chapters.flatMap(c =>
+        c.lessons.map(l => `${mod.slug}/${c.slug}/${l.slug}`)
+      );
+      const modDone = modLessons.filter(s => done.includes(s)).length;
+      const modPct = modLessons.length > 0 ? Math.round((modDone / modLessons.length) * 100) : 0;
+      const modComplete = modDone === modLessons.length && modLessons.length > 0;
+
+      const fill = document.getElementById(`mod-fill-${mod.slug}`);
+      const pctEl = document.getElementById(`mod-pct-${mod.slug}`);
+      const btn = document.getElementById(`mod-btn-${mod.slug}`);
+      const card = document.getElementById(`mod-${mod.slug}`);
+      if (fill) fill.style.width = modPct + '%';
+      if (pctEl) pctEl.textContent = modPct + '%';
+
+      if (btn) {
+        btn.href = `/course/${mod.slug}`;
+        btn.textContent = modComplete ? '✓ Module Complete' : (modDone > 0 ? 'Continue Module →' : 'Start Module →');
+      }
+
+      // Open only the first incomplete module
+      const shouldOpenMod = !modComplete && !firstIncompleteModOpened;
+      if (shouldOpenMod) firstIncompleteModOpened = true;
+      card?.classList.toggle('open', shouldOpenMod);
+
+      // Per-chapter logic
+      let firstIncompleteChOpened = false;
+
+      for (const ch of mod.chapters) {
+        const chLessons = ch.lessons.map(l => `${mod.slug}/${ch.slug}/${l.slug}`);
+        const chDone = chLessons.filter(s => done.includes(s)).length;
+        const chComplete = chDone === chLessons.length && chLessons.length > 0;
+
+        const badge = document.getElementById(`ch-badge-${mod.slug}-${ch.slug}`);
+        if (badge) badge.classList.toggle('visible', chComplete);
+
+        // Open only the first incomplete chapter, and only inside the open module
+        const shouldOpenCh = shouldOpenMod && !chComplete && !firstIncompleteChOpened;
+        if (shouldOpenCh) firstIncompleteChOpened = true;
+
+        const section = document.getElementById(`ch-${mod.slug}-${ch.slug}`);
+        const lessonsEl = document.getElementById(`ch-lessons-${mod.slug}-${ch.slug}`);
+        section?.classList.toggle('open', shouldOpenCh);
+        if (lessonsEl) lessonsEl.style.display = shouldOpenCh ? 'flex' : 'none';
+
+        for (const les of ch.lessons) {
+          const slug = `${mod.slug}/${ch.slug}/${les.slug}`;
+          const id = `lcheck-${slug.replaceAll('/', '-')}`;
+          const check = document.getElementById(id);
+          if (check) {
+            if (done.includes(slug)) {
+              check.classList.add('done');
+              check.textContent = '✓';
+            } else {
+              check.classList.remove('done');
+              check.textContent = '';
+            }
+          }
+        }
+      }
+    }
+
+    // Fallback: if all complete or no progress yet, open first module + first chapter
+    if (!firstIncompleteModOpened && courseData.modules.length > 0) {
+      const first = courseData.modules[0];
+      document.getElementById(`mod-${first.slug}`)?.classList.add('open');
+      if (first.chapters.length > 0) {
+        const fc = first.chapters[0];
+        document.getElementById(`ch-${first.slug}-${fc.slug}`)?.classList.add('open');
+        const lessonsEl = document.getElementById(`ch-lessons-${first.slug}-${fc.slug}`);
+        if (lessonsEl) lessonsEl.style.display = 'flex';
+      }
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', updateUI);
+</script>

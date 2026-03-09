@@ -1,0 +1,189 @@
+---
+import { getEntry } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import courseData from '../../../data/course.json';
+import '../../../styles/lesson.css';
+
+export async function getStaticPaths() {
+  return courseData.modules.map(mod => ({
+    params: { module: mod.slug },
+    props: { mod }
+  }));
+}
+
+const { mod } = Astro.props;
+
+const totalLessons = mod.chapters.reduce((t, c) => t + c.lessons.length, 0);
+const allSlugs = mod.chapters.flatMap(c =>
+  c.lessons.map(l => `${mod.slug}/${c.slug}/${l.slug}`)
+);
+
+// Try to load the readme for this module (optional)
+const readmeEntry = await getEntry('readmes', mod.slug).catch(() => null);
+const readmeContent = readmeEntry ? await readmeEntry.render() : null;
+const ReadmeContent = readmeContent?.Content ?? null;
+---
+
+<BaseLayout title={`${mod.title} · Make The Game`} activeNav="course">
+
+<div class="module-page-hero fade-up">
+  <div class="module-page-hero-inner">
+    <div class="module-page-label">✦ Module</div>
+    <span class="module-page-icon">{mod.icon}</span>
+    <h1 class="module-page-title">{mod.title}</h1>
+
+    <div class="module-page-progress">
+      <div class="module-page-progress-bar">
+        <div class="module-page-progress-fill" id="module-fill"></div>
+      </div>
+      <span class="module-page-progress-text" id="module-progress-text">0 / {totalLessons}</span>
+    </div>
+    <div class="module-page-cta">
+      <a href="#" id="module-cta" class="btn-primary">Start Module →</a>
+      <a href="/course" class="btn-secondary" style="background:transparent;color:rgba(245,240,232,.75);border-color:rgba(245,240,232,.22);">← All Modules</a>
+    </div>
+  </div>
+</div>
+
+{ReadmeContent && (
+  <div class="readme-wrap" id="readme-wrap">
+    <div class="readme-header" id="readme-toggle">
+      <span class="readme-header-left">
+        <span class="readme-icon">📋</span>
+        <span class="readme-title">Module Overview</span>
+      </span>
+      <span class="readme-chevron" id="readme-chevron">▾</span>
+    </div>
+    <div class="readme-body" id="readme-body">
+      <div class="readme-content lesson-body">
+        <ReadmeContent />
+      </div>
+    </div>
+  </div>
+)}
+
+<div class="module-chapters fade-up-1">
+  <div class="module-section-label">Chapters in this module</div>
+
+  {mod.chapters.map((ch, chIdx) => {
+    const chSlugs = ch.lessons.map(l => `${mod.slug}/${ch.slug}/${l.slug}`);
+    return (
+      <div class="chapter-card open" id={`ch-${ch.slug}`}>
+        <div class="chapter-card-header" data-toggle-ch={ch.slug}>
+          <span class="chapter-card-num">{String(chIdx + 1).padStart(2,'0')}</span>
+          <span class="chapter-card-title">{ch.title}</span>
+          <div class="chapter-card-meta">
+            <div class="chapter-card-progress">
+              <div class="chapter-card-progress-fill" id={`ch-fill-${ch.slug}`}></div>
+            </div>
+            <span class="chapter-card-pct" id={`ch-pct-${ch.slug}`}>0%</span>
+          </div>
+          <span class="chapter-card-chevron">▾</span>
+        </div>
+
+        <div class="chapter-card-body">
+          {ch.lessons.map((les, lesIdx) => {
+            const slug = `${mod.slug}/${ch.slug}/${les.slug}`;
+            return (
+              <a
+                class="chapter-card-lesson"
+                href={`/course/${mod.slug}/${ch.slug}/${les.slug}`}
+                data-slug={slug}
+              >
+                <span class="lesson-num-badge">{String(lesIdx + 1).padStart(2,'0')}</span>
+                <span class="lesson-card-title">{les.title}</span>
+                <span class="lesson-status-dot" id={`dot-${slug.replaceAll('/','-')}`}></span>
+              </a>
+            );
+          })}
+        </div>
+      </div>
+    );
+  })}
+</div>
+
+</BaseLayout>
+
+<script define:vars={{ mod, totalLessons, allSlugs }}>
+  function getProgress() {
+    try { return JSON.parse(localStorage.getItem('mtg-progress') || '[]'); }
+    catch { return []; }
+  }
+
+  function toggleChapter(slug) {
+    document.getElementById(`ch-${slug}`)?.classList.toggle('open');
+  }
+
+  document.addEventListener('click', (e) => {
+    const header = e.target.closest('[data-toggle-ch]');
+    if (header) toggleChapter(header.dataset.toggleCh);
+  });
+
+  function updateUI() {
+    const done = getProgress();
+    const modDone = allSlugs.filter(s => done.includes(s)).length;
+    const modPct = totalLessons > 0 ? Math.round((modDone / totalLessons) * 100) : 0;
+
+    // Module-level progress
+    const fill = document.getElementById('module-fill');
+    const text = document.getElementById('module-progress-text');
+    if (fill) fill.style.width = modPct + '%';
+    if (text) text.textContent = `${modDone} / ${totalLessons} lessons`;
+
+    // CTA
+    const cta = document.getElementById('module-cta');
+    if (cta) {
+      const firstIncomplete = allSlugs.find(s => !done.includes(s));
+      if (firstIncomplete) {
+        const parts = firstIncomplete.split('/');
+        cta.href = `/course/${parts[0]}/${parts[1]}/${parts[2]}`;
+        cta.textContent = modDone > 0 ? 'Continue Module →' : 'Start Module →';
+      } else {
+        cta.textContent = '🎉 Module Complete!';
+        cta.removeAttribute('href');
+      }
+    }
+
+    // Per-chapter and per-lesson
+    for (const ch of mod.chapters) {
+      const chSlugs = ch.lessons.map(l => `${mod.slug}/${ch.slug}/${l.slug}`);
+      const chDone = chSlugs.filter(s => done.includes(s)).length;
+      const chPct = chSlugs.length > 0 ? Math.round((chDone / chSlugs.length) * 100) : 0;
+
+      const chFill = document.getElementById(`ch-fill-${ch.slug}`);
+      const chPctEl = document.getElementById(`ch-pct-${ch.slug}`);
+      if (chFill) chFill.style.width = chPct + '%';
+      if (chPctEl) chPctEl.textContent = chPct + '%';
+
+      for (const les of ch.lessons) {
+        const slug = `${mod.slug}/${ch.slug}/${les.slug}`;
+        const dot = document.getElementById(`dot-${slug.replaceAll('/', '-')}`);
+        if (dot) dot.classList.toggle('done', done.includes(slug));
+      }
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', updateUI);
+
+  // ── README COLLAPSE ─────────────────────────────────────────
+  const readmeKey = `mtg-readme-${mod.slug}`;
+  const readmeToggle = document.getElementById('readme-toggle');
+  const readmeBody   = document.getElementById('readme-body');
+  const readmeChevron = document.getElementById('readme-chevron');
+
+  if (readmeToggle && readmeBody) {
+    // Restore saved state
+    const isCollapsed = localStorage.getItem(readmeKey) === 'collapsed';
+    if (isCollapsed) {
+      readmeBody.style.display = 'none';
+      if (readmeChevron) readmeChevron.style.transform = 'rotate(-90deg)';
+    }
+
+    readmeToggle.addEventListener('click', () => {
+      const collapsed = readmeBody.style.display === 'none';
+      readmeBody.style.display = collapsed ? 'block' : 'none';
+      if (readmeChevron) readmeChevron.style.transform = collapsed ? '' : 'rotate(-90deg)';
+      localStorage.setItem(readmeKey, collapsed ? 'open' : 'collapsed');
+    });
+  }
+</script>

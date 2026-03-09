@@ -27,8 +27,9 @@ const { title, description = 'A free, passion-made Unity course for complete beg
 
   <!-- Desktop links -->
   <ul class="nav-links">
+    <li><a href="/course" class={activeNav === 'course' ? 'active' : ''}>Course</a></li>
     <li><a href="/assets" class={activeNav === 'assets' ? 'active' : ''}>Free Assets</a></li>
-    <li><a href="/#newsletter">Newsletter</a></li>
+    <li><a href="/#newsletter" class="nav-hide-tablet">Newsletter</a></li>
     <li><a href="https://ko-fi.com" target="_blank" class="nav-cta">☕ Ko-fi</a></li>
   </ul>
 
@@ -48,6 +49,7 @@ const { title, description = 'A free, passion-made Unity course for complete beg
     <button class="nav-drawer-close" id="nav-drawer-close" aria-label="Close menu">✕</button>
   </div>
   <ul class="nav-drawer-links">
+    <li><a href="/course">Course</a></li>
     <li><a href="/assets">Free Assets</a></li>
     <li><a href="/#newsletter">Newsletter</a></li>
   </ul>
@@ -63,6 +65,7 @@ const { title, description = 'A free, passion-made Unity course for complete beg
   </div>
   <div class="footer-right">
     <div class="footer-links">
+      <a href="/course">Course</a>
       <a href="/assets">Free Assets</a>
       <a href="https://ko-fi.com" target="_blank">Ko-fi ☕</a>
     </div>
@@ -180,20 +183,6 @@ const { title, description = 'A free, passion-made Unity course for complete beg
   closeBtn?.addEventListener('click', closeDrawer);
   overlay?.addEventListener('click', closeDrawer);
   drawer?.querySelectorAll('a').forEach(a => a.addEventListener('click', closeDrawer));
-
-  // -- DARK MODE TOGGLE --
-  const toggleBtn = document.getElementById('theme-toggle');
-  const html      = document.documentElement;
-
-  function setTheme(theme) {
-    html.setAttribute('data-theme', theme);
-    localStorage.setItem('mtg-theme', theme);
-  }
-
-  toggleBtn?.addEventListener('click', () => {
-    const isDark = html.getAttribute('data-theme') === 'dark';
-    setTheme(isDark ? 'light' : 'dark');
-  });
 </script>
 
 </body>
